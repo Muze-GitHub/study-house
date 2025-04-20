@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Worker Demo</title>
+    <style>
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .demo-section {
+        margin-bottom: 30px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 5px;
+        cursor: pointer;
+      }
+      #result,
+      #noWorkerResult {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #f5f5f5;
+        border-radius: 4px;
+      }
+      .comparison {
+        display: flex;
+        gap: 20px;
+      }
+      .comparison-section {
+        flex: 1;
+        padding: 15px;
+        border: 1px solid #eee;
+        border-radius: 8px;
+      }
+      .ui-test {
+        margin-top: 20px;
+        text-align: center;
+      }
+      .animated-box {
+        width: 50px;
+        height: 50px;
+        background-color: #3498db;
+        margin: 0 auto;
+        animation: rotate 1s linear infinite;
+      }
+      @keyframes rotate {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Web Worker 示例</h1>
+
+      <div class="demo-section">
+        <h2>1. 计算性能对比</h2>
+        <div class="comparison">
+          <div class="comparison-section">
+            <h3>使用 Web Worker</h3>
+            <button onclick="startCalculation()">开始大量计算（Worker）</button>
+            <button onclick="stopWorker()">停止 Worker</button>
+            <div id="result"></div>
+          </div>
+          <div class="comparison-section">
+            <h3>不使用 Web Worker</h3>
+            <button onclick="startCalculationNoWorker()">
+              开始大量计算（无Worker）
+            </button>
+            <div id="noWorkerResult"></div>
+          </div>
+        </div>
+
+        <div class="ui-test">
+          <h3>UI 响应测试（动画）</h3>
+          <p>观察动画是否卡顿来判断主线程是否被阻塞</p>
+          <div class="animated-box"></div>
+        </div>
+      </div>
+
+      <div class="demo-section">
+        <h2>2. 数据通信示例</h2>
+        <button onclick="sendMessageToWorker()">发送消息给 Worker</button>
+        <div id="messageResult"></div>
+      </div>
+    </div>
+
+    <script>
+      let myWorker
+
+      function startCalculation() {
+        if (typeof Worker !== 'undefined') {
+          if (!myWorker) {
+            myWorker = new Worker('worker.js')
+
+            myWorker.onmessage = function (e) {
+              document.getElementById('result').innerHTML = `计算结果: ${
+                e.data
+              }<br>计算完成时间: ${new Date().toLocaleTimeString()}`
+            }
+
+            myWorker.onerror = function (error) {
+              console.error('Worker error:', error)
+              document.getElementById(
+                'result'
+              ).innerHTML = `错误: ${error.message}`
+            }
+          }
+          document.getElementById(
+            'result'
+          ).innerHTML = `开始计算...<br>开始时间: ${new Date().toLocaleTimeString()}`
+          myWorker.postMessage('start')
+        } else {
+          document.getElementById('result').innerHTML =
+            '抱歉，您的浏览器不支持 Web Workers'
+        }
+      }
+
+      function startCalculationNoWorker() {
+        const startTime = new Date().toLocaleTimeString()
+        document.getElementById(
+          'noWorkerResult'
+        ).innerHTML = `开始计算...<br>开始时间: ${startTime}`
+
+        // 模拟耗时计算
+        let sum = 0
+        for (let i = 0; i < 100000000000; i++) {
+          sum += i
+        }
+
+        const endTime = new Date().toLocaleTimeString()
+        document.getElementById(
+          'noWorkerResult'
+        ).innerHTML = `计算结果: ${sum}<br>计算完成时间: ${endTime}`
+      }
+
+      function stopWorker() {
+        if (myWorker) {
+          myWorker.terminate()
+          myWorker = undefined
+          document.getElementById('result').innerHTML = 'Worker 已停止'
+        }
+      }
+
+      function sendMessageToWorker() {
+        if (myWorker) {
+          const data = {
+            type: 'customMessage',
+            content: '你好，Worker！'
+          }
+          myWorker.postMessage(data)
+        } else {
+          document.getElementById('messageResult').innerHTML = '请先启动 Worker'
+        }
+      }
+    </script>
+  </body>
+</html>
