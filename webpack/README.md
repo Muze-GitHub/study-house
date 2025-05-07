@@ -1,12 +1,13 @@
 # webpack-i18n-loader-demo
 
-这是一个自定义 webpack i18n-loader 的演示。
+这是一个自定义 webpack i18n-loader 和 plugin 的演示。
 
 ## 目录结构
 
 ```
 webpack/
   ├── i18n-loader.js         # 自定义 loader
+  ├── my-demo-plugin.js      # 自定义 plugin
   ├── i18n/
   │   ├── zh-CN.json         # 中文翻译
   │   └── en-US.json         # 英文翻译
@@ -20,6 +21,59 @@ webpack/
 
 `i18n-loader.js` 会将源码中所有 `__('key')` 替换为对应语言的翻译文本。
 
+## plugin 作用
+
+`plugins/my-demo-plugin.js` 是一个自定义 webpack 插件，演示了 plugin 能做 loader 做不到的事情：
+
+- **监听构建生命周期**：在编译开始、emit 阶段、构建结束等不同阶段执行自定义逻辑。
+- **操作输出资源**：不仅可以生成新文件，还可以读取、修改、删除所有输出资源。
+- **访问和操作 webpack 内部对象**：如 compilation、compiler、stats 等。
+- **与 loader 不同**：loader 只能处理单个文件内容，plugin 可以影响整个构建流程和所有资源。
+
+### 本 demo 的 plugin 做了什么？
+
+1. **编译开始时输出提示**（compile 阶段）
+2. **emit 阶段自动生成一个 my-demo.txt 文件**
+3. **构建结束后输出所有输出文件名**（done 阶段）
+
+### 如何使用自定义 plugin
+
+1. 在 `webpack.config.js` 中引入并添加到 `plugins` 数组：
+   ```js
+   const MyDemoPlugin = require('./plugins/my-demo-plugin')
+   plugins: [new MyDemoPlugin()]
+   ```
+2. 构建后在 `dist/` 目录下会看到 `my-demo.txt`，并在控制台看到构建阶段的提示和输出文件列表。
+
+`plugins/progress-plugin-demo.js` 是一个自定义的进度插件，模拟了 webpack 构建过程中的进度输出。
+
+- **实时输出构建进度百分比**：在构建过程中不断在终端输出进度。
+- **构建完成后输出提示**。
+- 这种全局进度提示是 loader 无法实现的，只有 plugin 能监听和操作整个构建流程。
+
+### 如何使用 ProgressPluginDemo
+
+1. 在 `webpack.config.js` 中引入并添加到 `plugins` 数组：
+   ```js
+   const ProgressPluginDemo = require('./plugins/progress-plugin-demo')
+   plugins: [new ProgressPluginDemo()]
+   ```
+2. 构建时会在终端看到进度百分比和完成提示。
+
+## 常见的 webpack plugin
+
+| plugin 名称                | 作用说明                             |
+| -------------------------- | ------------------------------------ |
+| HtmlWebpackPlugin          | 自动生成 HTML 文件并注入打包资源     |
+| DefinePlugin               | 定义全局常量（如环境变量）           |
+| CleanWebpackPlugin         | 构建前自动清理输出目录               |
+| MiniCssExtractPlugin       | 抽离 CSS 到单独文件                  |
+| CopyWebpackPlugin          | 拷贝静态资源到输出目录               |
+| BannerPlugin               | 给每个输出文件头部加注释             |
+| ProvidePlugin              | 自动加载模块（如全局引入 jQuery 等） |
+| HotModuleReplacementPlugin | 启用热更新                           |
+| ProgressPlugin             | 显示构建进度                         |
+
 ## 如何运行
 
 1. 安装依赖：
@@ -30,13 +84,9 @@ webpack/
    ```bash
    npm run build
    ```
-3. 查看 `dist/bundle.js`，你会发现：
-   ```js
-   console.log('你好，世界')
-   console.log('你好')
-   console.log(__('not_exist_key'))
-   ```
-   如果你想切换为英文，只需修改 `webpack.config.js` 里的 `options: { lang: 'en-US' }`。
+3. 查看 `dist/` 目录，会看到：
+   - `bundle.js`（主输出文件）
+   - `my-demo.txt`（由自定义 plugin 生成）
 
 ## 1. loader 能做什么？
 

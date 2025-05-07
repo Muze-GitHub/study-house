@@ -7,7 +7,7 @@ module.exports = function (source) {
   const lang = options.lang || 'zh-CN'
 
   // 读取对应语言的 JSON 文件
-  const i18nPath = path.resolve(__dirname, 'i18n', `${lang}.json`)
+  const i18nPath = path.resolve(__dirname, '../i18n', `${lang}.json`)
   let i18nMap = {}
   if (fs.existsSync(i18nPath)) {
     i18nMap = JSON.parse(fs.readFileSync(i18nPath, 'utf-8'))

@@ -1,4 +1,5 @@
 const path = require('path')
+const ProgressPluginDemo = require('./plugins/progress-plugin-demo')
 
 module.exports = {
   entry: './src/index.js',
@@ -12,15 +13,15 @@ module.exports = {
         test: /\.js$/,
         use: [
           {
-            loader: path.resolve(__dirname, 'i18n-loader.js'),
-            // options: { lang: 'zh-CN' }
+            loader: path.resolve(__dirname, 'loaders', 'i18n-loader.js'),
             options: {
-              lang: 'en-US'
+              lang: 'en-US' // 默认语言 zh-CN
             }
           }
         ]
       }
     ]
   },
+  plugins: [new ProgressPluginDemo()],
   mode: 'development'
 }
