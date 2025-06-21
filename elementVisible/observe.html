@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .item {
+        width: 300px;
+        aspect-ratio: 1/1;
+        background-color: #f00;
+        margin-top: 130vh;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="item"></div>
+    <script>
+      const item = document.querySelector('.item')
+      const observer = new IntersectionObserver(
+        (entries) => {
+          // 设置超过50%才算是进入可视区域
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              console.log('进入可视区域', entry.intersectionRatio)
+            } else {
+              console.log('离开可视区域', entry.intersectionRatio)
+            }
+          })
+        },
+        {
+          threshold: 0.5
+        }
+      )
+      observer.observe(item)
+    </script>
+  </body>
+</html>
